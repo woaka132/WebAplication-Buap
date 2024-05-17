@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FacadeService } from 'src/app/services/facade.service';
 declare var $:any;
 @Component({
   selector: 'app-navbar',
@@ -7,31 +8,47 @@ declare var $:any;
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit{
-
-  @Input() tipo: string = "";
+  @Input() tipo:string = "";
   @Input() rol:string ="";
 
-  public token:string = "";
+  public token : string = "";
+  public editar:boolean = false;
 
   constructor(
-    private router:Router
+    private router: Router,
+    private facadeService: FacadeService,
+    public activatedRoute: ActivatedRoute,
   ){}
 
   ngOnInit(): void {
+    this.rol = this.facadeService.getUserGroup();
+    console.log("Rol user: ", this.rol);
+    //Validar que haya inicio de sesión
+    //Obtengo el token del login
+    this.token = this.facadeService.getSessionToken();
+    //El primer if valida si existe un parámetro en la URL
+    if(this.activatedRoute.snapshot.params['id'] != undefined){
+      this.editar = true;
+    }
 
   }
 
-
+  //Cerrar sesión
   public logout(){
-
+    this.facadeService.logout().subscribe(
+      (response)=>{
+        console.log("Entró");
+        this.facadeService.destroyUser();
+        //Navega al login
+        this.router.navigate(["/"]);
+      }, (error)=>{
+        console.error(error);
+      }
+    );
   }
 
   public goRegistro(){
     this.router.navigate(["registro-usuarios"]);
-  }
-
-  public goRegistroMaterias(){
-    this.router.navigate(["registrar-materias"]);
   }
 
   public clickNavLink(link: string){
@@ -58,6 +75,14 @@ export class NavbarComponent implements OnInit{
       $("#maestro").removeClass("active");
       $("#principal").removeClass("active");
       $("#graficas").addClass("active");
+      $("#materias").removeClass("active");
+    }else if(link == "materias"){
+      $("#alumno").removeClass("active");
+      $("#maestro").removeClass("active");
+      $("#principal").removeClass("active");
+      $("#graficas").removeClass("active");
+      $("#materias").addClass("active");
     }
   }
+
 }

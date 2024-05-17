@@ -105,7 +105,7 @@ class AdminsViewEdit(generics.CreateAPIView):
 
         #Obtener total de maestros
         maestros = Maestros.objects.filter(user__is_active = 1).order_by("id")
-        lista_maestros = MaestroSerializer(maestros, many=True).data
+        lista_maestros = MaestrosSerializer(maestros, many=True).data
         #Aquí convertimos los valores de nuevo a un array
         if not lista_maestros:
             return Response({},400)
