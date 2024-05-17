@@ -1,8 +1,7 @@
-
 <div class="wrapper">
-    <!-- Va a englobar todo el formulario con la cabecera -->
-    <canvas #canvas id="canvas" style="height: 100%; width: 100%; position: relative;" ></canvas>
+  <canvas #canvas id="canvas" ></canvas>
     <div class="section-registro">
+          <!-- Va a englobar todo el formulario con la cabecera -->
         <div class="body-registro">
           <div class="row mt-3 mb-3">
             <div class="form-group col-12">
@@ -44,14 +43,14 @@
 
           <mat-form-field class="mat-input" appearance="outline">
               <mat-label>Horario de Inicio</mat-label>
-              <input matInput [(ngModel)]="materia.horario_inicio" [ngxTimepicker]="picker" placeholder="Dar click para selecionar una hora" readonly>
+              <input matInput [(ngModel)]="materia.horario_inicio" [ngxTimepicker]="picker" [min]="'07:00 am'" [max]="'07:00 pm'" placeholder="Dar click para selecionar una hora" (ngModelChange)="DataPickerChange()" readonly>
               <ngx-material-timepicker #picker></ngx-material-timepicker>
           </mat-form-field>  
           <div *ngIf="errors.horario_inicio" class="invalid-feedback">{{ errors.horario_inicio }}</div> 
           
-          <mat-form-field class="mat-input" appearance="outline">
+          <mat-form-field class="mat-input" appearance="outline" >
             <mat-label>Horario de Finalización</mat-label>
-            <input matInput [(ngModel)]="materia.horario_finalizacion" [ngxTimepicker]="picker_final" placeholder="Dar click para selecionar una hora"  readonly>
+            <input matInput [(ngModel)]="materia.horario_finalizacion" [ngxTimepicker]="picker_final" [min]="minpicker" [max]="'09:00 pm'" placeholder="Dar click para selecionar una hora" [disabled]="disablepicker" readonly>
             <ngx-material-timepicker #picker_final></ngx-material-timepicker>
         </mat-form-field>  
         <div *ngIf="errors.horario_finalizacion" class="invalid-feedback">{{ errors.horario_finalizacion }}</div>   
@@ -70,10 +69,7 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <div *ngIf="errors.programa_educativo" class="invalid-feedback">{{ errors.programa_educativo }}</div>
-
-        
-  
+          <div *ngIf="errors.programa_educativo" class="invalid-feedback">{{ errors.programa_educativo }}</div> 
           <div class="section-buttons">
               <button class="btn btn-danger" (click)="regresar()">Cancelar</button>
               <button *ngIf="!editar" class="btn btn-primary" type="submit" (click)="registrar()">Registrar</button>

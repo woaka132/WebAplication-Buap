@@ -1,8 +1,10 @@
 import { Component, OnInit, AfterViewInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MateriasService } from '../../services/materias.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacadeService } from 'src/app/services/facade.service';
 import { Location } from '@angular/common';
+import { EditarMateriasModalComponent } from 'src/app/modals/editar-materias-modal/editar-materias-modal.component'
 
 import * as THREE from "three";
 import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -17,7 +19,12 @@ declare var $:any;
   styleUrls: ['./registrar-materias.component.scss']
 })
 
+
+
 export class RegistrarMateriasComponent implements OnInit{
+  public disablepicker:boolean = true;
+  public minpicker:string = '00:00';
+
   @Input() rol:string = "";
   @Input() datos_user: any = {};
 
@@ -32,8 +39,6 @@ export class RegistrarMateriasComponent implements OnInit{
   public inputType_2: string = 'password';
 
   public dias_json: any [] = [];
-  
-
 
   public dias:any[]= [
     {value: '1', nombre: 'Lunez'},
@@ -101,13 +106,12 @@ export class RegistrarMateriasComponent implements OnInit{
     const renderer = new CSS2DRenderer();
     renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
     renderer.domElement.style.position = 'absolute';
-    renderer.domElement.style.top = '0px';
-    //renderer.domElement.style.zIndex='-1';
+    renderer.domElement.style.top = '100px';
+    renderer.domElement.style.zIndex='0';
     document.body.appendChild(renderer.domElement);
     this.controls = new OrbitControls(this.camera, renderer.domElement);
     //this.controls.enabled=false;
     this.controls.autoRotate = true;
-    this.controls.enableZoom = true;
     this.controls.enablePan = false;
     this.controls.update();
   };
@@ -190,7 +194,8 @@ export class RegistrarMateriasComponent implements OnInit{
     private router: Router,
     public activatedRoute: ActivatedRoute,
     private materiasService: MateriasService,
-    private facadeService: FacadeService
+    private facadeService: FacadeService,
+    public dialog: MatDialog
   ){}
 
   ngOnInit(): void {
@@ -245,7 +250,7 @@ export class RegistrarMateriasComponent implements OnInit{
   }
 
   public actualizar(){
-    //Validación
+    //Validación  
     this.errors = [];
     console.log(this.materia)
     this.errors = this.materiasService.validarMateria(this.materia);
@@ -253,17 +258,34 @@ export class RegistrarMateriasComponent implements OnInit{
       return false;
     }
     console.log("Pasó la validación");
+    console.log(this.materia)
+    
+    const dialogRef = this.dialog.open(EditarMateriasModalComponent,{
+      data: {}, //Se pasan valores a través del componente
+      height: '288px',
+      width: '328px',
+    });
 
-    this.materiasService.editarMateria(this.materia).subscribe(
-      (response)=>{
-        alert("Matería editada correctamente");
-        console.log("Matería editada: ", response);
-        //Si se editó, entonces mandar al home
-        this.router.navigate(["materias"]);
-      }, (error)=>{
-        alert("No se pudo editar el maestro");
+    dialogRef.afterClosed().subscribe(result => {
+      if(result.isEditable){
+
+        this.materiasService.editarMateria(this.materia).subscribe(
+          (response)=>{
+            alert("Matería editada correctamente");
+            console.log("Matería editada: ", response);
+            //Si se editó, entonces mandar al home
+            this.router.navigate(["materias"]);
+          }, (error)=>{
+            alert("ERROR SERVER EDIT");
+          }
+        );
+
+      }else{
+        alert("Cancelacion de edicion de Materia");
+        console.log("Materia no editada");
       }
-    );
+    });
+    
   }
 
   public revisarSeleccion(nombre: string){
@@ -279,8 +301,12 @@ export class RegistrarMateriasComponent implements OnInit{
     }
   }
 
+  public DataPickerChange(){
+    this.disablepicker = false;
+    this.minpicker = this.materia.horario_inicio;
+  }
+  
   public checkboxChange(event:any){
-    //console.log("Evento: ", event);
     if(event.checked){
       this.dias_json.push(event.source.value)
       this.materia.dias_json = this.dias_json

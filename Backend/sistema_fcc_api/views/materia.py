@@ -73,21 +73,18 @@ class MateriaView(generics.CreateAPIView):
 class MateriaViewEdit(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     def put(self, request, *args, **kwargs):
-        # iduser=request.data["id"]
-        request.data["dias_json"] = json.dumps(request.data["dias_json"])
         materia = get_object_or_404(Materia, id=request.data["id"])
         materia.nrc = request.data["nrc"]
         materia.nombre_de_la_materia = request.data["nombre_de_la_materia"],
-        materia.seccion= request.data["seccion"],
+        #materia.seccion= request.data["seccion"],
         materia.horario_inicio	= request.data["horario_inicio"],
         materia.horario_finalizacion= request.data["horario_finalizacion"],
         materia.salon= request.data["salon"],
         materia.programa_educativo= request.data["programa_educativo"],
+        request.data["dias_json"] = json.dumps(request.data["dias_json"])
         materia.dias_json = request.data["dias_json"]
-
         materia.save()
         user = MateriaSerializer(materia, many=False).data
-
         return Response(user,200)
     
     def delete(self, request, *args, **kwargs):
